@@ -21,7 +21,6 @@ function create({ name, email, passwordHash }) {
   return user;
 }
 
-/** Strip fields that should never leave the server (e.g. passwordHash). */
 function toPublicJSON(user) {
   if (!user) return null;
   const { passwordHash, ...safe } = user;
