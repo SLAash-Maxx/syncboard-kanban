@@ -76,3 +76,10 @@ function remove(id) {
   tasks.splice(index, 1);
   return true;
 }
+module.exports = {
+  findAll,
+  findById,
+  create,
+  update,
+  remove,
+};
