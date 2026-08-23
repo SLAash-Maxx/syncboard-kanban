@@ -8,8 +8,3 @@ function signToken(user) {
     { expiresIn: config.jwtExpiresIn }
   );
 }
-
-function verifyToken(token) {
-  return jwt.verify(token, config.jwtSecret);
-}
-module.exports = { signToken, verifyToken };
