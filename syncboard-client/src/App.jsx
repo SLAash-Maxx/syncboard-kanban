@@ -1,5 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
+import FilterBar from './components/FilterBar';
+import Column from './components/Column';
+import TaskModal from './components/TaskModal';
+import { useAuth } from './context/AuthContext';
+import * as taskApi from './api/taskApi';
+import './App.css';
 
 function App() {
   return (
