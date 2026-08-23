@@ -47,3 +47,10 @@ const updateTask = asyncHandler(async (req, res) => {
   }
   res.json({ task: result.task });
 });
+const deleteTask = asyncHandler(async (req, res) => {
+  const deleted = Task.remove(req.params.id);
+  if (!deleted) return res.status(404).json({ error: 'Task not found' });
+  res.status(204).send();
+});
+
+module.exports = { getTasks, getTask, createTask, updateTask, deleteTask };
