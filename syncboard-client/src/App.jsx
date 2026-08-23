@@ -11,7 +11,6 @@ const CACHE_KEY = 'syncboard_tasks_cache';
 
 function App() {
   const { token } = useAuth();
-
   const [tasks, setTasks] = useState(() => {
     const cached = localStorage.getItem(CACHE_KEY);
     return cached ? JSON.parse(cached) : [];
@@ -39,7 +38,6 @@ function App() {
       setIsOffline(false);
       setErrorMessage('');
     } catch (err) {
-
       setIsOffline(true);
     }
   }, [token]);
