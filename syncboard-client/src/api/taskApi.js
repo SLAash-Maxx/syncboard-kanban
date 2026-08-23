@@ -15,3 +15,7 @@ export function updateTask(id, changes, expectedUpdatedAt, token) {
     token,
   }).then((data) => data.task);
 }
+
+export function deleteTask(id, token) {
+  return request(`/tasks/${id}`, { method: 'DELETE', token };
+}
