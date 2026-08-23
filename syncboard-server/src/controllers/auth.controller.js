@@ -47,7 +47,6 @@ const login = asyncHandler(async (req, res) => {
 });
 
 const me = asyncHandler(async (req, res) => {
-  // req.user is set by the requireAuth middleware on this route
   res.json({ user: req.user });
 });
 
