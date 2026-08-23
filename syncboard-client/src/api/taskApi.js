@@ -17,5 +17,5 @@ export function updateTask(id, changes, expectedUpdatedAt, token) {
 }
 
 export function deleteTask(id, token) {
-  return request(`/tasks/${id}`, { method: 'DELETE', token };
+  return request(`/tasks/${id}`, { method: 'DELETE', token });
 }
