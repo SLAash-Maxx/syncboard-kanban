@@ -1,10 +1,6 @@
 const { verifyToken } = require('../utils/jwt');
 const User = require('../models/User.model');
 
-/**
- * Protects a route: requires `Authorization: Bearer <token>`.
- * On success, attaches `req.user` (public fields only) for downstream handlers.
- */
 function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const [scheme, token] = header.split(' ');
