@@ -29,4 +29,21 @@ const createTask = asyncHandler(async (req, res) => {
   });
   res.status(201).json({ task });
 });
+const updateTask = asyncHandler(async (req, res) => {
+  const { expectedUpdatedAt, ...changes } = req.body;
+  delete changes.id;
+  delete changes.ownerId;
 
+  const result = Task.update(req.params.id, changes, expectedUpdatedAt);
+
+  if (result.notFound) {
+    return res.status(404).json({ error: 'Task not found' });
+  }
+  if (result.conflict) {
+    return res.status(409).json({
+      error: 'This task was changed by someone else since you loaded it',
+      current: result.current,
+    });
+  }
+  res.json({ task: result.task });
+});
