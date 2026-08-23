@@ -58,3 +58,21 @@ function create({ title, description, priority, status, dueDateTime, tags, owner
   tasks.push(task);
   return task;
 }
+function update(id, changes, expectedUpdatedAt) {
+  const task = findById(id);
+  if (!task) return { notFound: true };
+
+  if (expectedUpdatedAt && task.updatedAt !== expectedUpdatedAt) {
+    return { conflict: true, current: task };
+  }
+
+  Object.assign(task, changes, { updatedAt: new Date().toISOString() });
+  return { task };
+}
+
+function remove(id) {
+  const index = tasks.findIndex((t) => t.id === Number(id));
+  if (index === -1) return false;
+  tasks.splice(index, 1);
+  return true;
+}
