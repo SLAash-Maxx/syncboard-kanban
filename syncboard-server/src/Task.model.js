@@ -43,3 +43,18 @@ function findAll() {
 function findById(id) {
   return tasks.find((t) => t.id === Number(id));
 }
+function create({ title, description, priority, status, dueDateTime, tags, ownerId }) {
+  const task = {
+    id: nextId++,
+    title,
+    description: description || '',
+    priority: priority || 'Medium',
+    status: status || 'todo',
+    dueDateTime: dueDateTime || null,
+    tags: tags || [],
+    ownerId: ownerId || null,
+    updatedAt: new Date().toISOString(),
+  };
+  tasks.push(task);
+  return task;
+}
