@@ -1,0 +1,4 @@
+syncboard-client/.env
+syncboard-server/.env
+node_modules/
+dist/
