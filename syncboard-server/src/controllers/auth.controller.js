@@ -47,6 +47,10 @@ const login = asyncHandler(async (req, res) => {
 });
 
 const me = asyncHandler(async (req, res) => {
+<<<<<<< Updated upstream
+=======
+  // req.user is set by the requireAuth middleware on this route
+>>>>>>> Stashed changes
   res.json({ user: req.user });
 });
 

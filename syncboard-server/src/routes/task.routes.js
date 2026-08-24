@@ -9,6 +9,11 @@ const {
 const { requireAuth } = require('../middleware/auth.middleware');
 
 const router = express.Router();
+<<<<<<< Updated upstream
+=======
+
+// Every task route requires a logged-in user
+>>>>>>> Stashed changes
 router.use(requireAuth);
 
 router.get('/', getTasks);
