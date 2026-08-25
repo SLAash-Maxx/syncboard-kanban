@@ -1,3 +1,13 @@
+/**
+ * Task "model" - Milestone 2 (Working REST API)
+ *
+ * Same idea as User.model.js: an in-memory array standing in for MongoDB
+ * until Milestone 3, when this becomes a Mongoose model. Keeping the
+ * field names identical to the front end's mock data (see
+ * syncboard-client/src/App.jsx INITIAL_TASKS) so wiring the client up to
+ * real endpoints is a drop-in swap rather than a rewrite.
+ */
+
 let tasks = [
   {
     id: 1,
@@ -42,6 +52,7 @@ function findAll() {
 function findById(id) {
   return tasks.find((t) => t.id === Number(id));
 }
+
 function create({ title, description, priority, status, dueDateTime, tags, ownerId }) {
   const task = {
     id: nextId++,
@@ -57,6 +68,14 @@ function create({ title, description, priority, status, dueDateTime, tags, owner
   tasks.push(task);
   return task;
 }
+
+/**
+ * Updates a task IF the caller's known `expectedUpdatedAt` still matches
+ * what's stored. Returns { conflict: true, current } instead of applying
+ * the change when it doesn't - this is the hook the group's concurrent-edit
+ * detection (a mandatory technical requirement) plugs into. Session M5
+ * pairs this with Socket.io so both clients find out immediately.
+ */
 function update(id, changes, expectedUpdatedAt) {
   const task = findById(id);
   if (!task) return { notFound: true };
@@ -75,6 +94,7 @@ function remove(id) {
   tasks.splice(index, 1);
   return true;
 }
+
 module.exports = {
   findAll,
   findById,

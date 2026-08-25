@@ -1,64 +1,46 @@
 import React from 'react';
 
-const FilterBar = ({
-  searchQuery,
-  setSearchQuery,
-  filterPriority,
-  setFilterPriority,
-  filterTag,
-  setFilterTag,
-  availableTags = [],
-  sortBy,
-  setSortBy,
-}) => {
+function FilterBar({ 
+  searchTerm, 
+  setSearchTerm, 
+  priorityFilter, 
+  setPriorityFilter, 
+  sortBy, 
+  setSortBy 
+}) {
   return (
     <div className="filter-bar">
-      <div className="filter-group">
+      <div className="search-box">
         <input
           type="text"
-          placeholder="Search tasks..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="search-input"
+          placeholder="Search by title, description or tag..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
+      </div>
 
-        <select
-          value={filterPriority}
-          onChange={(e) => setFilterPriority(e.target.value)}
-          className="filter-select"
-        >
-          <option value="ALL">All Priorities</option>
-          <option value="HIGH">High</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="LOW">Low</option>
-        </select>
+      <div className="filter-controls">
+        <div className="control-group">
+          <label>Priority:</label>
+          <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
+            <option value="All">All</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
 
-        <select
-          value={filterTag}
-          onChange={(e) => setFilterTag(e.target.value)}
-          className="filter-select"
-        >
-          <option value="ALL">All Tags</option>
-          {availableTags.map((tag) => (
-            <option key={tag} value={tag}>
-              {tag}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="filter-select"
-        >
-          <option value="DEFAULT">Default Order</option>
-          <option value="DUE_DATE_ASC">Due Date (Earliest)</option>
-          <option value="DUE_DATE_DESC">Due Date (Latest)</option>
-          <option value="PRIORITY">Priority (High to Low)</option>
-        </select>
+        <div className="control-group">
+          <label>Sort By:</label>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="default">Default</option>
+            <option value="dueDate">Due Date</option>
+            <option value="priority">Priority (High to Low)</option>
+          </select>
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default FilterBar;

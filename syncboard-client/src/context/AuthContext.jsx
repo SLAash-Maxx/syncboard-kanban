@@ -9,6 +9,8 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // On first load, if we already have a token, ask the API who it belongs
+  // to rather than trusting stale localStorage data.
   useEffect(() => {
     if (!token) {
       setIsLoading(false);
@@ -18,7 +20,7 @@ export function AuthProvider({ children }) {
       .fetchMe(token)
       .then((data) => setUser(data.user))
       .catch(() => {
-
+        // token expired / invalid - clear it out
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
         setUser(null);

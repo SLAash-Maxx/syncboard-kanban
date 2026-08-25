@@ -11,6 +11,10 @@ const CACHE_KEY = 'syncboard_tasks_cache';
 
 function App() {
   const { token } = useAuth();
+
+  // Seeded from whatever we last cached, so a refresh (or a brief network
+  // loss) still shows something instead of a blank board - the mandatory
+  // client-side persistence requirement from the brief.
   const [tasks, setTasks] = useState(() => {
     const cached = localStorage.getItem(CACHE_KEY);
     return cached ? JSON.parse(cached) : [];
@@ -26,6 +30,7 @@ function App() {
   const [priorityFilter, setPriorityFilter] = useState('All');
   const [sortBy, setSortBy] = useState('default');
 
+  // Cache every successful tasks snapshot so it survives a refresh/offline blip
   useEffect(() => {
     localStorage.setItem(CACHE_KEY, JSON.stringify(tasks));
   }, [tasks]);
@@ -38,6 +43,8 @@ function App() {
       setIsOffline(false);
       setErrorMessage('');
     } catch (err) {
+      // Real backend unreachable - keep showing the cached copy from
+      // localStorage rather than clearing the board.
       setIsOffline(true);
     }
   }, [token]);
@@ -73,6 +80,9 @@ function App() {
       }
     } catch (err) {
       if (err.status === 409) {
+        // Someone else changed this task first - refresh our copy from the
+        // server and let the user retry with current data rather than
+        // silently clobbering their change.
         setErrorMessage('That task was updated by someone else. Showing the latest version - please re-apply your change.');
         setTasks((prev) => prev.map((t) => (t.id === err.payload.current.id ? err.payload.current : t)));
       } else {

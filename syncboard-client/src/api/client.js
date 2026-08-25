@@ -1,5 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+/**
+ * Small fetch wrapper shared by authApi.js and taskApi.js.
+ * - Prefixes every path with the API base URL
+ * - Attaches the JWT (if present) as a Bearer token
+ * - Throws on non-2xx responses with the server's `error` message so
+ *   callers can just try/catch instead of checking res.ok everywhere
+ */
 async function request(path, { method = 'GET', body, token } = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;

@@ -29,6 +29,16 @@ const createTask = asyncHandler(async (req, res) => {
   });
   res.status(201).json({ task });
 });
+
+/**
+ * PATCH /api/tasks/:id
+ * Body may include `expectedUpdatedAt` (the `updatedAt` the client last
+ * saw). If another user changed the task since then, this returns 409 with
+ * the current server copy instead of silently overwriting their edit -
+ * this is the "documented approach to concurrent edits" required by the
+ * brief. The client is expected to show the conflict to the user rather
+ * than retry blindly.
+ */
 const updateTask = asyncHandler(async (req, res) => {
   const { expectedUpdatedAt, ...changes } = req.body;
   delete changes.id;
@@ -47,6 +57,7 @@ const updateTask = asyncHandler(async (req, res) => {
   }
   res.json({ task: result.task });
 });
+
 const deleteTask = asyncHandler(async (req, res) => {
   const deleted = Task.remove(req.params.id);
   if (!deleted) return res.status(404).json({ error: 'Task not found' });
