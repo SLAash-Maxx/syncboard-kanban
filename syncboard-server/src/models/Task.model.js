@@ -1,98 +1,100 @@
+const mongoose = require('mongoose');
+
 /**
- * Task "model" - Milestone 2 (Working REST API)
+ * Task model - Milestone 3 (Persistence & Offline Support).
  *
- * Same idea as User.model.js: an in-memory array standing in for MongoDB
- * until Milestone 3, when this becomes a Mongoose model. Keeping the
- * field names identical to the front end's mock data (see
- * syncboard-client/src/App.jsx INITIAL_TASKS) so wiring the client up to
- * real endpoints is a drop-in swap rather than a rewrite.
+ * Replaces the in-memory array from M2. Method names (findAll, findById,
+ * create, update, remove) are kept identical so task.controller.js and
+ * task.routes.js didn't need to change.
+ *
+ * NOTE on the id fields: `.lean()` docs come back with `_id`, but the
+ * front end and API_CONTRACT.md were built around a plain `id`, so every
+ * read here maps `_id` -> `id` before returning.
  */
-
-let tasks = [
+const taskSchema = new mongoose.Schema(
   {
-    id: 1,
-    title: 'Setup React + Vite Project',
-    description: 'Initialize base repository and setup dark mode styles.',
-    priority: 'High',
-    status: 'done',
-    dueDateTime: '2026-08-15T18:00',
-    tags: ['Frontend', 'DevOps'],
-    ownerId: null,
-    updatedAt: new Date().toISOString(),
+    title: { type: String, required: true, trim: true },
+    description: { type: String, default: '' },
+    priority: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Medium' },
+    status: { type: String, enum: ['todo', 'in-progress', 'done'], default: 'todo' },
+    dueDateTime: { type: String, default: null },
+    tags: { type: [String], default: [] },
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   },
-  {
-    id: 2,
-    title: 'Design Kanban Columns',
-    description: 'Create responsive column layouts for To Do, In Progress, Done.',
-    priority: 'Medium',
-    status: 'in-progress',
-    dueDateTime: '2026-08-20T12:00',
-    tags: ['Design', 'Frontend'],
-    ownerId: null,
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 3,
-    title: 'Integrate LocalStorage & Filters',
-    description: 'Implement persistent storage along with dynamic searching and sorting.',
-    priority: 'High',
-    status: 'todo',
-    dueDateTime: '2026-08-10T10:00',
-    tags: ['Frontend'],
-    ownerId: null,
-    updatedAt: new Date().toISOString(),
-  },
-];
-let nextId = tasks.length + 1;
+  { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } }
+);
 
-function findAll() {
-  return tasks;
-}
+const TaskDoc = mongoose.model('Task', taskSchema);
 
-function findById(id) {
-  return tasks.find((t) => t.id === Number(id));
-}
-
-function create({ title, description, priority, status, dueDateTime, tags, ownerId }) {
-  const task = {
-    id: nextId++,
-    title,
-    description: description || '',
-    priority: priority || 'Medium',
-    status: status || 'todo',
-    dueDateTime: dueDateTime || null,
-    tags: tags || [],
-    ownerId: ownerId || null,
-    updatedAt: new Date().toISOString(),
+function toPlain(doc) {
+  if (!doc) return doc;
+  const { _id, __v, ...rest } = doc;
+  return {
+    id: String(_id),
+    ...rest,
+    ownerId: rest.ownerId ? String(rest.ownerId) : null,
+    updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt,
   };
-  tasks.push(task);
-  return task;
+}
+
+async function findAll() {
+  const docs = await TaskDoc.find().sort({ createdAt: 1 }).lean();
+  return docs.map(toPlain);
+}
+
+async function findById(id) {
+  try {
+    const doc = await TaskDoc.findById(id).lean();
+    return toPlain(doc);
+  } catch (err) {
+    return null; // malformed ObjectId
+  }
+}
+
+async function create({ title, description, priority, status, dueDateTime, tags, ownerId }) {
+  const doc = await TaskDoc.create({
+    title,
+    description,
+    priority,
+    status,
+    dueDateTime,
+    tags,
+    ownerId: ownerId || null,
+  });
+  return toPlain(doc.toObject());
 }
 
 /**
- * Updates a task IF the caller's known `expectedUpdatedAt` still matches
- * what's stored. Returns { conflict: true, current } instead of applying
- * the change when it doesn't - this is the hook the group's concurrent-edit
- * detection (a mandatory technical requirement) plugs into. Session M5
- * pairs this with Socket.io so both clients find out immediately.
+ * Same conflict-detection contract as the M2 in-memory version: if
+ * `expectedUpdatedAt` is provided and no longer matches what's stored,
+ * returns { conflict: true, current } instead of applying the change.
  */
-function update(id, changes, expectedUpdatedAt) {
-  const task = findById(id);
-  if (!task) return { notFound: true };
+async function update(id, changes, expectedUpdatedAt) {
+  let existing;
+  try {
+    existing = await TaskDoc.findById(id);
+  } catch (err) {
+    return { notFound: true };
+  }
+  if (!existing) return { notFound: true };
 
-  if (expectedUpdatedAt && task.updatedAt !== expectedUpdatedAt) {
-    return { conflict: true, current: task };
+  const currentUpdatedAtISO = existing.updatedAt.toISOString();
+  if (expectedUpdatedAt && currentUpdatedAtISO !== expectedUpdatedAt) {
+    return { conflict: true, current: toPlain(existing.toObject()) };
   }
 
-  Object.assign(task, changes, { updatedAt: new Date().toISOString() });
-  return { task };
+  Object.assign(existing, changes);
+  await existing.save(); // bumps updatedAt via the timestamps option
+  return { task: toPlain(existing.toObject()) };
 }
 
-function remove(id) {
-  const index = tasks.findIndex((t) => t.id === Number(id));
-  if (index === -1) return false;
-  tasks.splice(index, 1);
-  return true;
+async function remove(id) {
+  try {
+    const result = await TaskDoc.findByIdAndDelete(id);
+    return Boolean(result);
+  } catch (err) {
+    return false; // malformed ObjectId
+  }
 }
 
 module.exports = {

@@ -14,12 +14,12 @@ const register = asyncHandler(async (req, res) => {
   if (password.length < 6) {
     return res.status(400).json({ error: 'password must be at least 6 characters' });
   }
-  if (User.findByEmail(email)) {
+  if (await User.findByEmail(email)) {
     return res.status(409).json({ error: 'An account with this email already exists' });
   }
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  const user = User.create({ name, email, passwordHash });
+  const user = await User.create({ name, email, passwordHash });
   const token = signToken(user);
 
   res.status(201).json({ user: User.toPublicJSON(user), token });
@@ -32,7 +32,7 @@ const login = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'email and password are required' });
   }
 
-  const user = User.findByEmail(email);
+  const user = await User.findByEmail(email);
   if (!user) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }

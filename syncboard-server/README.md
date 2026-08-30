@@ -33,17 +33,19 @@ Server listens on `http://localhost:5000` by default.
 - Tokens are signed with `JWT_SECRET` from `.env` - the sample value in
   `.env.example` is NOT safe to use anywhere but local dev.
 
-## About the in-memory models
+## Database (Milestone 3)
 
-`src/models/User.model.js` and `src/models/Task.model.js` are plain
-JS arrays, not a database. That's intentional for this milestone - the
-brief introduces MongoDB/Mongoose at Milestone 3 (Persistence & Offline
-Support). The models already expose the shape a Mongoose model would
-(`findAll`, `findById`, `create`, `update`, `remove`), so next session's
-work is swapping the implementation, not rewriting every controller.
+`src/models/User.model.js` and `src/models/Task.model.js` are now
+Mongoose schemas backed by MongoDB - data survives server restarts.
+Set `MONGODB_URI` in `.env` (Atlas connection string or
+`mongodb://localhost:27017/syncboard` for a local instance) before
+running `npm run dev` / `npm start`; the server refuses to boot without
+it (see `src/config/db.js`).
 
-Restarting the server resets all data to the three seed tasks in
-`Task.model.js`.
+The model method names (`findAll`, `findById`, `create`, `update`,
+`remove`) are unchanged from the M2 in-memory version on purpose, so
+the controllers didn't need to change - only `await` was added at each
+call site.
 
 ## Concurrent-edit detection
 

@@ -5,7 +5,7 @@ const User = require('../models/User.model');
  * Protects a route: requires `Authorization: Bearer <token>`.
  * On success, attaches `req.user` (public fields only) for downstream handlers.
  */
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const [scheme, token] = header.split(' ');
 
@@ -15,7 +15,7 @@ function requireAuth(req, res, next) {
 
   try {
     const payload = verifyToken(token);
-    const user = User.findById(payload.sub);
+    const user = await User.findById(payload.sub);
     if (!user) {
       return res.status(401).json({ error: 'User for this token no longer exists' });
     }

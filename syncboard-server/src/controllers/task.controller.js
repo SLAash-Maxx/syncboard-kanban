@@ -2,11 +2,11 @@ const Task = require('../models/Task.model');
 const asyncHandler = require('../utils/asyncHandler');
 
 const getTasks = asyncHandler(async (req, res) => {
-  res.json({ tasks: Task.findAll() });
+  res.json({ tasks: await Task.findAll() });
 });
 
 const getTask = asyncHandler(async (req, res) => {
-  const task = Task.findById(req.params.id);
+  const task = await Task.findById(req.params.id);
   if (!task) return res.status(404).json({ error: 'Task not found' });
   res.json({ task });
 });
@@ -18,7 +18,7 @@ const createTask = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'title is required' });
   }
 
-  const task = Task.create({
+  const task = await Task.create({
     title,
     description,
     priority,
@@ -44,7 +44,7 @@ const updateTask = asyncHandler(async (req, res) => {
   delete changes.id;
   delete changes.ownerId;
 
-  const result = Task.update(req.params.id, changes, expectedUpdatedAt);
+  const result = await Task.update(req.params.id, changes, expectedUpdatedAt);
 
   if (result.notFound) {
     return res.status(404).json({ error: 'Task not found' });
@@ -59,7 +59,7 @@ const updateTask = asyncHandler(async (req, res) => {
 });
 
 const deleteTask = asyncHandler(async (req, res) => {
-  const deleted = Task.remove(req.params.id);
+  const deleted = await Task.remove(req.params.id);
   if (!deleted) return res.status(404).json({ error: 'Task not found' });
   res.status(204).send();
 });
