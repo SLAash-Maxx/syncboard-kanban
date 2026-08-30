@@ -4,12 +4,6 @@ SyncBoard is a full-stack real-time collaborative task management and Kanban boa
 
 ---
 
-## ⚠️ Important Note: Authentication Status
-
-> **Login Functionality Currently Disabled:**
-> - **Sign Up (Register):** Implemented and functional for creating test user accounts.
-> - **Login:** Currently **not functional** because persistent database storage is not yet connected. Registered users are stored in temporary runtime memory and session verification requires the database layer, which is actively under development.
-
 ---
 
 ## 📌 Features & Overview
