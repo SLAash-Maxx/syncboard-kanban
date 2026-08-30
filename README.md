@@ -49,7 +49,6 @@ board now talks to the real API instead of only local mock data.
 
 ## Known limitations (M2)
 
-- Data resets on server restart - no database yet.
 - Single shared task list - no multi-board support yet.
 - No automated tests or CI pipeline yet.
 - No real-time sync between clients yet (each client re-fetches on load
